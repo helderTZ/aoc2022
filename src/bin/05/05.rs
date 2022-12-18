@@ -48,6 +48,16 @@ fn apply_move(move_crate: &MoveCrate, crate_stack: &mut Vec<Vec<char>>) {
     }
 }
 
+fn apply_move_n(move_crate: &MoveCrate, crate_stack: &mut Vec<Vec<char>>) {
+    let mut krates: Vec<char> = Vec::with_capacity(move_crate.quantity);
+    for _ in 0..move_crate.quantity {
+        krates.push(crate_stack[move_crate.src-1].pop().unwrap());
+    }
+    for k in krates.iter().rev() {
+        crate_stack[move_crate.dst-1].push(*k);
+    }
+}
+
 fn _print_crate_stack(crate_stack: &Vec<Vec<char>>) {
     let mut krate_str = String::new();
     let mut num_levels = 0;
@@ -77,16 +87,28 @@ fn main () {
     let initial_arrangement = it.next().unwrap();
     let procedure = it.next().unwrap();
 
-    let mut crate_stack = create_crate_stack(initial_arrangement);
-
+    let mut crate_stack1 = create_crate_stack(initial_arrangement);
     for line in procedure.lines() {
         let move_crate = MoveCrate::from_str(line);
-        apply_move(&move_crate, &mut crate_stack);
+        // _print_crate_stack(&crate_stack1);
+        apply_move(&move_crate, &mut crate_stack1);
     }
 
-    let mut answer = String::new();
-    for k in crate_stack {
-        answer.push(*k.last().unwrap());
+    let mut crate_stack2 = create_crate_stack(initial_arrangement);
+    for line in procedure.lines() {
+        let move_crate = MoveCrate::from_str(line);
+        // _print_crate_stack(&crate_stack2);
+        apply_move_n(&move_crate, &mut crate_stack2);
     }
-    println!("{}", answer);
+
+    let mut answer1 = String::new();
+    let mut answer2 = String::new();
+    for k in crate_stack1 {
+        answer1.push(*k.last().unwrap());
+    }
+    for k in crate_stack2 {
+        answer2.push(*k.last().unwrap());
+    }
+    println!("{}", answer1);
+    println!("{}", answer2);
 }
