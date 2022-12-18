@@ -14,17 +14,13 @@ fn search_for_marker(s: &str, marker_length: usize) -> usize {
     let mut marker_start = 0;
     let mut marker_end = marker_length;
     for c in s.char_indices() {
-        if c.0 > marker_start && c.0 < marker_end {
-            continue;
-        }
-        else if c.0 > marker_end {
+        if c.0 > marker_end {
             if check_repeated(s
                 .split_at(marker_start).1
                 .split_at(marker_length).0
             ) {
                 marker_start += 1;
                 marker_end += 1;
-                continue;
             }
             else {
                 first_marker = marker_end;
