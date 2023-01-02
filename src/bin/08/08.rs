@@ -97,31 +97,71 @@ fn create_height_matrix(height_map: &str) -> (Vec<Vec<usize>>, usize, usize) {
     (height_mat, width, height)
 }
 
-// TODO: refactor to use two Vecs, one for the cols and one for the rows
-//       this would duplicate the memory usage, but might make for simpler
-//       logic (and maybe better performance)
+fn get_scenic_score(hmat: &Vec<Vec<usize>>, width: usize, height: usize, row: usize, col: usize) -> usize {
+    let mut scenic_up = 0;
+    let mut scenic_down = 0;
+    let mut scenic_left = 0;
+    let mut scenic_right = 0;
+    for c in (0..col).rev() {
+        if hmat[row][c] >= hmat[row][col] {
+            scenic_left += 1;
+            break;
+        }
+        else {
+            scenic_left += 1;
+        }
+    }
+    for c in (col+1)..(height) {
+        if hmat[row][c] >= hmat[row][col] {
+            scenic_right += 1;
+            break;
+        }
+        else {
+            scenic_right += 1;
+        }
+    }
+    for r in (0..row).rev() {
+        if hmat[r][col] >= hmat[row][col] {
+            scenic_up += 1;
+            break;
+        }
+        else {
+            scenic_up += 1;
+        }
+    }
+    for r in (row+1)..(width) {
+        if hmat[r][col] >= hmat[row][col] {
+            scenic_down += 1;
+            break;
+        }
+        else {
+            scenic_down += 1;
+        }
+    }
 
-// struct HeightMatrix {
-//     width: usize,
-//     height: usize,
-//     rows: Vec<Vec<usize>>,
-//     cols: Vec<Vec<usize>>,
-// }
+    scenic_up * scenic_down * scenic_left * scenic_right
+}
 
-// fn create_height_vectors(height_map: &str) -> HeightMatrix {
-//     let mut rows: Vec<Vec<usize>> = vec![];
-//     let mut cols: Vec<Vec<usize>> = vec![];
-//     let mut height = 0;
-//     let mut width = 0;
-//     for (r, line) in height_map.lines().enumerate() {
-//         height = j
-//     }
-// }
+fn get_highest_scenic_score(hmat: &Vec<Vec<usize>>, width: usize, height: usize) -> usize {
+    let mut scenic_score = 0;
+    for r in 0..height {
+        for c in 0..width {
+            let this_scenic = get_scenic_score(hmat, width, height, r, c);
+            if this_scenic > scenic_score {
+                scenic_score = this_scenic;
+            }
+        }
+    }
+
+    scenic_score
+}
 
 fn main() {
     let (height_mat, width, height) = create_height_matrix(HEIGHT_MAP);
     let visible_trees = count_visible_trees(&height_mat, width, height);
+    let scenic_score = get_highest_scenic_score(&height_mat, width, height);
     println!("{}", visible_trees);
+    println!("{}", scenic_score);
 }
 
 #[cfg(test)]
@@ -183,5 +223,36 @@ mod tests {
         let height = 5;
 
         assert_eq!(count_visible_trees(&input, width, height), 21);
+    }
+
+    #[test]
+    fn test_get_scenic_score() {
+        let input = vec![
+            vec![3, 0, 3, 7, 3],
+            vec![2, 5, 5, 1, 2],
+            vec![6, 5, 3, 3, 2],
+            vec![3, 3, 5, 4, 9],
+            vec![3, 5, 3, 9, 0],
+        ];
+        let width = 5;
+        let height = 5;
+
+        assert_eq!(get_scenic_score(&input, width, height, 1, 2), 4);
+        assert_eq!(get_scenic_score(&input, width, height, 3, 2), 8);
+    }
+
+    #[test]
+    fn test_get_highest_scenic_score() {
+        let input = vec![
+            vec![3, 0, 3, 7, 3],
+            vec![2, 5, 5, 1, 2],
+            vec![6, 5, 3, 3, 2],
+            vec![3, 3, 5, 4, 9],
+            vec![3, 5, 3, 9, 0],
+        ];
+        let width = 5;
+        let height = 5;
+
+        assert_eq!(get_highest_scenic_score(&input, width, height), 8);
     }
 }
