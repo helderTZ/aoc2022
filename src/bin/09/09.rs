@@ -46,47 +46,65 @@ fn update_tail(head_pos: &(i32, i32), curr_tail_pos: &(i32, i32)) -> (i32, i32) 
     new_tail_pos
 }
 
-fn main() {
-    let mut head_pos: (i32, i32) = (0, 0);
-    let mut tail_pos: (i32, i32) = (0, 0);
+fn update_rope(motions: &str, knots: usize) -> usize {
+    let mut rope: Vec<(i32, i32)> = Vec::with_capacity(knots);
     let mut tail_positions = HashSet::new();
-    for line in MOTIONS.lines() {
+
+    for _ in 0..knots {
+        rope.push((0, 0));
+    }
+
+    for line in motions.lines() {
         let mut it = line.split_ascii_whitespace();
         let direction = it.next().unwrap();
         let steps = it.next().unwrap().parse::<i32>().unwrap();
         match direction {
             "U" => {
                 for _ in 0..steps {
-                    head_pos.0 += 1;
-                    tail_pos = update_tail(&head_pos, &tail_pos);
-                    tail_positions.insert(tail_pos);
+                    rope[0].0 += 1;
+                    for i in 1..rope.len() {
+                        rope[i] = update_tail(&rope[i-1], &rope[i]);
+                    }
+                    tail_positions.insert(rope.last().unwrap().clone());
                 }
             },
             "D" => {
                 for _ in 0..steps {
-                    head_pos.0 -= 1;
-                    tail_pos = update_tail(&head_pos, &tail_pos);
-                    tail_positions.insert(tail_pos);
+                    rope[0].0 -= 1;
+                    for i in 1..rope.len() {
+                        rope[i] = update_tail(&rope[i-1], &rope[i]);
+                    }
+                    tail_positions.insert(rope.last().unwrap().clone());
                 }
             },
             "L" => {
                 for _ in 0..steps {
-                    head_pos.1 -= 1;
-                    tail_pos = update_tail(&head_pos, &tail_pos);
-                    tail_positions.insert(tail_pos);
+                    rope[0].1 -= 1;
+                    for i in 1..rope.len() {
+                        rope[i] = update_tail(&rope[i-1], &rope[i]);
+                    }
+                    tail_positions.insert(rope.last().unwrap().clone());
                 }
             },
             "R" => {
                 for _ in 0..steps {
-                    head_pos.1 += 1;
-                    tail_pos = update_tail(&head_pos, &tail_pos);
-                    tail_positions.insert(tail_pos);
+                    rope[0].1 += 1;
+                    for i in 1..rope.len() {
+                        rope[i] = update_tail(&rope[i-1], &rope[i]);
+                    }
+                    tail_positions.insert(rope.last().unwrap().clone());
                 }
             },
             _ => panic!("Invalid direction"),
         };
     }
 
-    println!("{:?}, {:?}", head_pos, tail_pos);
-    println!("{}", tail_positions.len());
+    tail_positions.len()
+}
+
+fn main() {
+    let tail_positions2 = update_rope(MOTIONS, 2);
+    let tail_positions9 = update_rope(MOTIONS, 10);
+    println!("{}", tail_positions2);
+    println!("{}", tail_positions9);
 }
